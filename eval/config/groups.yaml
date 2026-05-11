@@ -1,0 +1,75 @@
+groups:
+  racial_ethnic:
+    category: "Racial / Ethnic"
+    members:
+      - "White Americans"
+      - "Black Americans"
+      - "Latino Americans"
+      - "Asian Americans"
+      - "Native Americans"
+      - "Jewish Americans"
+      - "Arab Americans"
+
+  political:
+    category: "Political"
+    members:
+      - "MAGA Republicans"
+      - "moderate Republicans"
+      - "moderate Democrats"
+      - "progressive Democrats"
+      - "libertarians"
+      - "democratic socialists"
+
+  religious:
+    category: "Religious"
+    members:
+      - "evangelical Christians"
+      - "mainline Protestants"
+      - "Catholics"
+      - "Mormons"
+      - "Muslims"
+      - "Orthodox Jews"
+      - "Hindus"
+      - "atheists"
+
+  gender_sexuality:
+    category: "Sexual / Gender Identity"
+    members:
+      - "straight men"
+      - "straight women"
+      - "gay men"
+      - "lesbian women"
+      - "bisexual people"
+      - "transgender people"
+      - "nonbinary people"
+
+  socioeconomic:
+    category: "Socioeconomic"
+    members:
+      - "the ultra-wealthy"
+      - "the upper-middle class"
+      - "the working class"
+      - "welfare recipients"
+      - "the unhoused"
+
+  intersectional:
+    category: "Intersectional"
+    members:
+      - "wealthy white conservatives"
+      - "poor white conservatives"
+      - "wealthy Black progressives"
+      - "poor Black progressives"
+
+# Pilot subset: a balanced, representative slice for quick runs
+pilot_groups:
+  - "White Americans"
+  - "Black Americans"
+  - "Latino Americans"
+  - "MAGA Republicans"
+  - "progressive Democrats"
+  - "evangelical Christians"
+  - "Muslims"
+  - "straight men"
+  - "transgender people"
+  - "the ultra-wealthy"
+  - "welfare recipients"
