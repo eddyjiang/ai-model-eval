@@ -78,10 +78,26 @@ def create_tables() -> None:
 def response_exists(run_id: str, model_key: str, group_name: str, template_id: str, trial: int) -> bool:
     with get_conn() as conn:
         row = conn.execute(
-            "SELECT id FROM responses WHERE run_id=? AND model_key=? AND group_name=? AND template_id=? AND trial=?",
+            """SELECT id FROM responses
+               WHERE run_id=? AND model_key=? AND group_name=? AND template_id=? AND trial=?
+               AND error IS NULL AND response IS NOT NULL""",
             (run_id, model_key, group_name, template_id, trial),
         ).fetchone()
         return row is not None
+
+
+def delete_errored_responses(run_id: Optional[str] = None, model_key: Optional[str] = None) -> int:
+    """Delete API-error response rows so they will be retried on the next run."""
+    sql = "DELETE FROM responses WHERE error IS NOT NULL"
+    params: list = []
+    if run_id:
+        sql += " AND run_id = ?"
+        params.append(run_id)
+    if model_key:
+        sql += " AND model_key = ?"
+        params.append(model_key)
+    with get_conn() as conn:
+        return conn.execute(sql, params).rowcount
 
 
 def save_response(

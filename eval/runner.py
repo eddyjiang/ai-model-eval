@@ -210,7 +210,7 @@ async def run_async(
     # Semaphore caps active coroutines per model so the event loop isn't
     # flooded with thousands of waiters when tasks >> RPM.
     semaphores: dict[str, asyncio.Semaphore] = {
-        mk: asyncio.Semaphore(8)
+        mk: asyncio.Semaphore(25)
         for mk in model_keys
     }
 

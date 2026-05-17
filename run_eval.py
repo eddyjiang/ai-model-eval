@@ -55,10 +55,11 @@ def cmd_run(args) -> None:
     groups_cfg, templates_cfg, models_cfg = load_config()
 
     # --- Resolve models ---
-    if args.pilot:
-        model_keys = models_cfg["pilot_models"]
-    elif args.models:
+    # Explicit --models always wins; --pilot is a fallback default only
+    if args.models:
         model_keys = args.models
+    elif args.pilot:
+        model_keys = models_cfg["pilot_models"]
     else:
         model_keys = list(models_cfg["models"].keys())
 
@@ -69,16 +70,12 @@ def cmd_run(args) -> None:
         sys.exit(1)
 
     # --- Resolve templates ---
-    if args.pilot:
-        template_ids = templates_cfg["pilot_templates"]
-    elif args.templates:
-        # args.templates can be category names (comedy, critical, positive) or template IDs
+    if args.templates:
         template_ids = []
         for t in args.templates:
             if t in templates_cfg["templates"]:
                 template_ids.append(t)
             else:
-                # treat as category
                 matched = [
                     tid for tid, td in templates_cfg["templates"].items()
                     if td["category"] == t
@@ -87,13 +84,13 @@ def cmd_run(args) -> None:
                     template_ids.extend(matched)
                 else:
                     print(f"Warning: unknown template/category '{t}', skipping.")
+    elif args.pilot:
+        template_ids = templates_cfg["pilot_templates"]
     else:
         template_ids = list(templates_cfg["templates"].keys())
 
     # --- Resolve groups ---
-    if args.pilot:
-        group_names = groups_cfg["pilot_groups"]
-    elif args.groups:
+    if args.groups:
         if args.groups == ["all"]:
             group_names = [
                 name
@@ -102,6 +99,8 @@ def cmd_run(args) -> None:
             ]
         else:
             group_names = resolve_groups(groups_cfg, args.groups)
+    elif args.pilot:
+        group_names = groups_cfg["pilot_groups"]
     else:
         group_names = [
             name
@@ -110,7 +109,13 @@ def cmd_run(args) -> None:
         ]
 
     # --- Resolve trials ---
-    n_trials = 2 if args.pilot else args.trials
+    # args.trials is None if not specified (see argparse default=None below)
+    if args.trials is not None:
+        n_trials = args.trials
+    elif args.pilot:
+        n_trials = 2
+    else:
+        n_trials = 5
 
     # --- Resolve run ID ---
     run_id = args.run_id or generate_run_id()
@@ -126,6 +131,11 @@ def cmd_run(args) -> None:
     if args.dry_run:
         print("\n[dry-run] Not executing.")
         return
+
+    if args.retry_errors and args.run_id:
+        deleted = storage.delete_errored_responses(run_id=args.run_id)
+        if deleted:
+            print(f"Cleared {deleted} errored response(s) for retry.")
     print()
 
     from eval.runner import run
@@ -177,9 +187,11 @@ def main():
                        help="Template IDs or categories (comedy critical positive). Default: all.")
     p_run.add_argument("--groups", nargs="+", default=None, metavar="GROUP",
                        help="Group categories (racial political religious gender socioeconomic intersectional) or 'all'. Default: all.")
-    p_run.add_argument("--trials", type=int, default=5, help="Trials per combination (default: 5)")
+    p_run.add_argument("--trials", type=int, default=None, help="Trials per combination (default: 5, or 2 with --pilot)")
     p_run.add_argument("--no-score", action="store_true", help="Skip automatic scoring after collection")
     p_run.add_argument("--dry-run", action="store_true", help="Print plan without executing")
+    p_run.add_argument("--retry-errors", action="store_true",
+                       help="Delete API-error rows for this run-id and retry them")
 
     # --- score ---
     p_score = sub.add_parser("score", help="Run judge scoring on collected responses")
