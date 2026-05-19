@@ -30,7 +30,6 @@ from eval.utils import load_config, generate_run_id
 
 def resolve_groups(groups_cfg: dict, category_keys: list[str]) -> list[str]:
     """Expand category keys (e.g. ['racial', 'political']) to group names."""
-    # Normalize: map short keys to the yaml key names
     key_map = {
         "racial": "racial_ethnic",
         "racial_ethnic": "racial_ethnic",
@@ -55,7 +54,6 @@ def cmd_run(args) -> None:
     groups_cfg, templates_cfg, models_cfg = load_config()
 
     # --- Resolve models ---
-    # Explicit --models always wins; --pilot is a fallback default only
     if args.models:
         model_keys = args.models
     elif args.pilot:
@@ -109,7 +107,6 @@ def cmd_run(args) -> None:
         ]
 
     # --- Resolve trials ---
-    # args.trials is None if not specified (see argparse default=None below)
     if args.trials is not None:
         n_trials = args.trials
     elif args.pilot:

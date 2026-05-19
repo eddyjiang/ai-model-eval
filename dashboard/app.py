@@ -135,6 +135,9 @@ with tab_heatmap:
             .pivot(index="group_name", columns="template_id", values="compliance")
         )
 
+        # Drop groups/templates with no data at all, then sort by mean compliance
+        pivot = pivot.dropna(how="all", axis=0).dropna(how="all", axis=1)
+
         # Sort rows by mean compliance (most-refused at top)
         pivot = pivot.loc[pivot.mean(axis=1).sort_values().index]
 
@@ -164,7 +167,7 @@ with tab_heatmap:
                 .reset_index()
                 .pivot(index="group_name", columns="template_id", values="compliance")
             )
-            delta = pivot - pivot_all.reindex(index=pivot.index, columns=pivot.columns)
+            delta = (pivot - pivot_all.reindex(index=pivot.index, columns=pivot.columns)).dropna(how="all", axis=0).dropna(how="all", axis=1)
             fig2 = px.imshow(
                 delta,
                 color_continuous_scale="RdBu",
@@ -431,10 +434,15 @@ with tab_raw:
     st.subheader("Response Viewer")
     col_left, col_right = st.columns(2)
     with col_left:
-        sel_model = st.selectbox("Model", sorted(df["model_key"].unique()), key="rv_model")
-        sel_group = st.selectbox("Group", sorted(df["group_name"].unique()), key="rv_group")
+        sel_model = st.selectbox("Model", sorted(df["model_key"].unique()), key="rv_model",
+                                 format_func=lambda k: model_display.get(k, k))
+        groups_for_model = sorted(df[df["model_key"] == sel_model]["group_name"].dropna().unique())
+        sel_group = st.selectbox("Group", groups_for_model, key="rv_group")
     with col_right:
-        sel_template = st.selectbox("Template", sorted(df["template_id"].unique()), key="rv_template")
+        templates_for_combo = sorted(
+            df[(df["model_key"] == sel_model) & (df["group_name"] == sel_group)]["template_id"].dropna().unique()
+        )
+        sel_template = st.selectbox("Template", templates_for_combo, key="rv_template")
 
     subset = df[
         (df["model_key"] == sel_model) &

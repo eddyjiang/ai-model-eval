@@ -5,7 +5,7 @@ models:
     litellm_model: "openrouter/anthropic/claude-sonnet-4.6"
     provider: "openrouter"
     requests_per_minute: 200
-    max_tokens: 1024
+    max_tokens: 2048
     temperature: 0.7
     # Claude is judged by GPT-4o to avoid self-serving bias
     judge: "gpt"
@@ -15,7 +15,7 @@ models:
     litellm_model: "openrouter/openai/gpt-5.5"
     provider: "openrouter"
     requests_per_minute: 200
-    max_tokens: 1024
+    max_tokens: 2048
     temperature: 0.7
     judge: "claude"
 
@@ -24,7 +24,9 @@ models:
     litellm_model: "openrouter/google/gemini-3.1-pro-preview"
     provider: "openrouter"
     requests_per_minute: 200
-    max_tokens: 1024
+    # Gemini uses thinking tokens that count against max_tokens but aren't
+    # returned as text; needs extra headroom so the actual response isn't cut off.
+    max_tokens: 8192
     temperature: 0.7
     judge: "claude"
 
@@ -33,7 +35,7 @@ models:
     litellm_model: "openrouter/x-ai/grok-4.3"
     provider: "openrouter"
     requests_per_minute: 200
-    max_tokens: 1024
+    max_tokens: 2048
     temperature: 0.7
     judge: "claude"
 
@@ -42,7 +44,7 @@ models:
     litellm_model: "openrouter/meta-llama/llama-4-maverick"
     provider: "openrouter"
     requests_per_minute: 200
-    max_tokens: 1024
+    max_tokens: 2048
     temperature: 0.7
     judge: "claude"
 
